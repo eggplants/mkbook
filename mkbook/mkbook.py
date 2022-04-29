@@ -82,9 +82,9 @@ class MakeBook:
                 stories.append(
                     Paragraph(os.path.basename(root), text_style),
                 )
-                stories.append(Spacer(1, 20))
+                stories.append(Spacer(1, font_size))
                 stories.append(Table(border_img, w, h))
-                stories.append(Spacer(1, 10))
+                stories.append(Spacer(1, font_size))
                 stories.append(Paragraph(f"{cnt}", text_style))
                 stories.append(PageBreak())
                 cnt += 1
