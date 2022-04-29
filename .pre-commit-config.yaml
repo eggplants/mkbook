@@ -46,7 +46,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - types-setuptools
-          # - ...
+          - types-pillow
         files: ^mkbook/
         args: []
   - repo: https://github.com/crate-ci/typos
