@@ -6,13 +6,13 @@ from typing import cast
 
 from PIL import Image as PImage
 from pkg_resources import resource_filename
-from reportlab.lib.colors import black as BLACK  # type: ignore[import]
-from reportlab.lib.enums import TA_CENTER  # type: ignore[import]
-from reportlab.lib.pagesizes import A4  # type: ignore[import]
-from reportlab.lib.styles import ParagraphStyle  # type: ignore[import]
-from reportlab.pdfbase import pdfmetrics  # type: ignore[import]
-from reportlab.pdfbase.ttfonts import TTFont  # type: ignore[import]
-from reportlab.platypus import (  # type: ignore[import]
+from reportlab.lib.colors import black as BLACK
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import (
     Image,
     PageBreak,
     Paragraph,
@@ -90,16 +90,17 @@ class MakeBook:
                 cnt += 1
             print(f"\033[2K{idx+1}/{tree_size} ({f_idx}/{files_size})", end="\n\033[A")
         print("\033[2KSaving...")
+
         (min_w, min_h), *_, (max_w, max_h) = sorted(sizes)
-        doc = SimpleDocTemplate(save_path)
         max_w += 400
         max_h += 400
-        doc.pagesize = (max_w, max_h)
+        doc = SimpleDocTemplate(save_path, pagesize=(max_w, max_h))
+
         doc.build(
             [
-                Spacer(1, max_h / 2, text_style)
+                Spacer(1, max_h / 2)
                 if s == 0
-                else Spacer(1, max_h / 4 + font_size + 10, text_style)
+                else Spacer(1, max_h / 4 + font_size + 10)
                 if s == 1
                 else s
                 for s in stories

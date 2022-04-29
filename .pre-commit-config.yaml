@@ -41,16 +41,16 @@ repos:
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.942
+    rev: v0.950
     hooks:
       - id: mypy
         additional_dependencies:
           - types-setuptools
           - types-pillow
         files: ^mkbook/
-        args: []
+        args: [--strict, --ignore-missing-imports]
   - repo: https://github.com/crate-ci/typos
-    rev: 'typos-v0.9.0'
+    rev: 'typos-dict-v0.8.2'
     hooks:
       - id: typos
   - repo: https://github.com/codespell-project/codespell
