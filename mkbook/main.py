@@ -24,8 +24,10 @@ def check_dir(s: str) -> str:
 
 
 def check_file(s: str) -> str:
-    if os.path.isfile(s):
+    if os.path.isfile(s) or not os.path.exists(s):
         return s
+    elif not os.path.isdir(os.path.dirname(s)):
+        raise argparse.ArgumentTypeError(f"Base dir of {repr(s)} does not exist.")
     else:
         raise argparse.ArgumentTypeError(f"{repr(s)} is not a file.")
 
@@ -62,13 +64,13 @@ def parse_args() -> argparse.Namespace:
         epilog=usage,
     )
     parser.add_argument(
-        "target-dir",
+        "target_dir",
         type=check_dir,
         help="target dir",
         metavar="PATH",
     )
     parser.add_argument(
-        "save-file",
+        "save_path",
         type=check_file,
         help="saved pdf file path",
         metavar="PATH",
@@ -80,13 +82,7 @@ def parse_args() -> argparse.Namespace:
         help="overwrite if pdf path exists",
         default=20,
     )
-    parser.add_argument(
-        "-F",
-        "--tt-font",
-        type=check_file,
-        help="truetype font file ",
-        default=argparse.SUPPRESS,
-    )
+    parser.add_argument("-F", "--tt-font", type=check_file, help="truetype font file")
     parser.add_argument("-o", "--overwrite", action="store_true")
     parser.add_argument(
         "-V",
@@ -99,14 +95,19 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    status = 0
     if os.path.exists(args.save_path) and not args.overwrite:
         print(
             f"{repr(args.save_path)} already exists. Use `-o` to overwrite.",
             file=sys.stderr,
         )
-    m = MakeBook(font_path=None if args.tt_font == argparse.SUPPRESS else args.tt_font)
-    m.make(args.save_path, args.target_dir, font_size=args.font_size)
-    print(f"Done: {repr(args.save_path)}")
+        status = 2
+    else:
+        font_path = None if args.tt_font == argparse.SUPPRESS else args.tt_font
+        m = MakeBook(font_path=font_path)
+        m.make(args.save_path, args.target_dir, font_size=args.font_size)
+        print(f"Done: {os.path.abspath(args.save_path)}")
+    sys.exit(status)
 
 
 if __name__ == "__main__":
