@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import os
 from typing import cast
 
@@ -13,15 +14,17 @@ from reportlab.pdfbase import pdfmetrics  # type: ignore[import]
 from reportlab.pdfbase.ttfonts import TTFont  # type: ignore[import]
 from reportlab.platypus import (  # type: ignore[import]
     Image,
+    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
+    Table,
 )
 
 
 class MakeBook:
     default_font = resource_filename(__name__, "fonts/RampartOne-Regular.ttf")
-    img_extensions = PImage.registered_extensions().keys()
+    img_extensions = PImage.registered_extensions()
 
     def __init__(self, font_path: str | None = None) -> None:
         self.set_font(font_path)
@@ -29,7 +32,7 @@ class MakeBook:
     def set_font(self, font_path: str | None = None) -> None:
         font_path = self.default_font if font_path is None else font_path
         font_name = os.path.basename(font_path).split(".")[0]
-        pdfmetrics.registerFont(TTFont(font_name, font_path))
+        pdfmetrics.registerFont(TTFont(font_name, font_path, asciiReadable=True))
         self.font_path, self.font_name = font_path, font_name
 
     def make(self, save_path: str, target_path: str, font_size: int = 20) -> None:
@@ -39,24 +42,78 @@ class MakeBook:
             alignment=TA_CENTER,
             fontSize=font_size,
             textColor=BLACK,
-            splitLongWords=True,
+            wordWrap="CJK",
         )
-        stories = []
-        doc = SimpleDocTemplate(save_path, pagesize=A4)
-        for root, _dirs, files in os.walk(target_path):
+        stories = [0, Paragraph(os.path.basename(target_path), text_style), PageBreak()]
+        sizes = [A4, A4]
+        cnt = 1
+        tree = [t for t in os.walk(target_path)]
+        tree_size = len(tree)
+        for idx, (root, _dirs, files) in enumerate(tree):
             files = sorted(
-                f for f in files if f".{'.'.split(f)[-1]}" in self.img_extensions
+                f for f in files if os.path.splitext(f)[-1] in self.img_extensions
             )
-            _w, h = self.get_size(files)
-            stories.append(Spacer(1, h / 2))
-            stories.append(Paragraph(root, text_style))
-            for img in files:
-                stories.append(Image(img, _w, h))
-        doc.build(stories)
+            w, h = self.get_size(root, files)
+            sizes.append((w, h))
+            if len(files) > 0:
+                stories.extend(
+                    (
+                        0,
+                        Paragraph(
+                            os.path.basename(root)
+                            .replace("　", "<br />\n<br />\n")
+                            .replace("]", "]<br />\n<br />\n"),
+                            text_style,
+                        ),
+                        1,
+                        Paragraph(f"{cnt}", text_style),
+                        PageBreak(),
+                    )
+                )
+                cnt += 1
+            files_size = len(files)
+            f_idx = 0
+            for f_idx, img in enumerate(files):
+                print(
+                    f"\033[2K{idx+1}/{tree_size} ({f_idx+1}/{files_size})",
+                    end="\n\033[A",
+                )
+                border_img = [[Image(os.path.join(root, img))]]
+                stories.append(
+                    Paragraph(os.path.basename(root), text_style),
+                )
+                stories.append(Spacer(1, 20))
+                stories.append(Table(border_img, w, h))
+                stories.append(Spacer(1, 10))
+                stories.append(Paragraph(f"{cnt}", text_style))
+                stories.append(PageBreak())
+                cnt += 1
+            print(f"\033[2K{idx+1}/{tree_size} ({f_idx}/{files_size})", end="\n\033[A")
+        print("\033[2KSaving...")
+        (min_w, min_h), *_, (max_w, max_h) = sorted(sizes)
+        doc = SimpleDocTemplate(save_path)
+        max_w += 400
+        max_h += 400
+        doc.pagesize = (max_w, max_h)
+        doc.build(
+            [
+                Spacer(1, max_h / 2, text_style)
+                if s == 0
+                else Spacer(1, max_h / 4 + font_size + 10, text_style)
+                if s == 1
+                else s
+                for s in stories
+            ]
+        )
 
-    def get_size(self, files: list[str]) -> tuple[float, float]:
+    @staticmethod
+    def pil_to_bytes(img: PImage.Image) -> bytes:
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format="PNG")
+        return img_bytes.getvalue()
+
+    def get_size(self, root: str, files: list[str]) -> tuple[float, float]:
         if len(files) == 0:
             return cast(tuple[float, float], A4)
-        sizes = [PImage.open(f).size for f in files]
-        w, h = sorted(sizes)[-1]
+        w, h = sorted(PImage.open(os.path.join(root, f)).size for f in files)[-1]
         return float(w), float(h)
