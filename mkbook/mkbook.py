@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import io
 import os
+import re
+from functools import cmp_to_key
 from typing import cast
 
 from PIL import Image as PImage
@@ -48,8 +50,10 @@ class MakeBook:
         sizes = [A4, A4]
         cnt = 1
         tree = [t for t in os.walk(target_path)]
+        tree = self.sort_v(tree)
         tree_size = len(tree)
         for idx, (root, _dirs, files) in enumerate(tree):
+            print(root)
             files = sorted(
                 f for f in files if os.path.splitext(f)[-1] in self.img_extensions
             )
@@ -118,3 +122,20 @@ class MakeBook:
             return cast(tuple[float, float], A4)
         w, h = sorted(PImage.open(os.path.join(root, f)).size for f in files)[-1]
         return float(w), float(h)
+
+    @staticmethod
+    def sort_v(
+        tree: list[tuple[str, list[str], list[str]]]
+    ) -> list[tuple[str, list[str], list[str]]]:
+        def cmp(
+            a: tuple[str, list[str], list[str]], b: tuple[str, list[str], list[str]]
+        ) -> int:
+            def norm(s: str) -> str:
+                tr = str.maketrans("１２３４５６７８９０", "1234567890")
+                s = s.translate(tr)
+                return re.sub(r"(\d+)", lambda m: m.group(1).zfill(30), s)
+
+            sa, sb = norm(a[0]), norm(b[0])
+            return -1 if sa < sb else 1 if sa > sb else 0
+
+        return sorted(tree, key=cmp_to_key(cmp))
