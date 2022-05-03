@@ -46,7 +46,20 @@ class MakeBook:
             textColor=BLACK,
             wordWrap="CJK",
         )
-        stories = [0, Paragraph(os.path.basename(target_path), text_style), PageBreak()]
+        door_text_style = ParagraphStyle(
+            name="Normal",
+            fontName=self.font_name,
+            alignment=TA_CENTER,
+            fontSize=font_size * 3,
+            textColor=BLACK,
+            wordWrap="CJK",
+        )
+        br = "<br />\n<br />\n"
+        stories = [
+            0,
+            Paragraph(os.path.basename(target_path), door_text_style),
+            PageBreak(),
+        ]
         sizes = [A4, A4]
         cnt = 1
         tree = [t for t in os.walk(target_path)]
@@ -65,9 +78,9 @@ class MakeBook:
                         0,
                         Paragraph(
                             os.path.basename(root)
-                            .replace("　", "<br />\n<br />\n")
-                            .replace("]", "]<br />\n<br />\n"),
-                            text_style,
+                            .replace("　", br * 2)
+                            .replace("]", "]" + br * 2),
+                            door_text_style,
                         ),
                         1,
                         Paragraph(f"{cnt}", text_style),
@@ -104,7 +117,7 @@ class MakeBook:
             [
                 Spacer(1, max_h / 2)
                 if s == 0
-                else Spacer(1, max_h / 4 + font_size + 10)
+                else Spacer(1, max_h / 8 + font_size * 9)
                 if s == 1
                 else s
                 for s in stories
