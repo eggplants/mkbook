@@ -50,7 +50,7 @@ repos:
         files: ^mkbook/
         args: [--strict, --ignore-missing-imports]
   - repo: https://github.com/crate-ci/typos
-    rev: 'v1.8.1'
+    rev: 'v1.10.1'
     hooks:
       - id: typos
   - repo: https://github.com/codespell-project/codespell
