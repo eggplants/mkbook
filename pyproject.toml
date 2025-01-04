@@ -1,0 +1,95 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [
+  "poetry-core",
+]
+
+[tool.poetry]
+authors = [
+  "eggplants <w10776e8w@yahoo.co.jp>",
+]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+description = "Make directory including pictures into a PDF book"
+keywords = [
+  "getjump",
+  "pdf",
+  "conbine",
+]
+name = "mkbook"
+packages = [
+  { include = "mkbook" },
+]
+include = [ "mkbook/fonts/*.ttf" ]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/eggplants/mkbook"
+version = "0.0.2"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4"
+pillow = "^11.1.0"
+reportlab = "^4.2.5"
+types-reportlab = "^4.2.5.20241221"
+types-pillow = "^10.2.0.20240822"
+
+[tool.poetry.group.dev.dependencies]
+mypy = ">=0.991,<1.15"
+pre-commit = ">=2.20,<4.0"
+taskipy = "^1.10.3"
+
+[tool.poetry.scripts]
+mkbook = "mkbook.main:main"
+
+[tool.black]
+line-length = 120
+target-version = [
+  'py39',
+]
+
+[tool.ruff]
+line-length = 120
+
+lint.select = [
+  "ALL",
+]
+lint.ignore = [
+  "D",
+  "T201", # `print` found
+]
+lint.per-file-ignores."main.py" = [
+  "EM102",  # Exception must not use an f-string literal, assign to variable first
+  "TRY003", # Avoid specifying long messages outside the exception class
+]
+lint.mccabe.max-complexity = 18
+
+[tool.mypy]
+pretty = true
+python_version = "3.9"
+show_error_codes = true
+strict = true
+
+[tool.pyright]
+pythonVersion = "3.9"
+typeCheckingMode = "strict"
+
+[tool]
+
+[tool.pytype]
+python_version = '3.9'
+jobs = '4'
+report_errors = true
+precise_return = true
+protocols = true
+strict_import = true
+
+[tool.taskipy.tasks]
+test = "pytest --cov=mkbook --cov-report=term"
+"test:ci" = "task test --cov-report=xml:cov.xml"
+lint = "pre-commit run -a"
+profile = "python -m cProfile"

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import argparse
-import os
 import shutil
 import sys
 import textwrap
+from pathlib import Path
 
 from . import MakeBook, __version__
 
@@ -17,27 +17,25 @@ class MBHelpFormatter(
 
 
 def check_dir(s: str) -> str:
-    if os.path.isdir(s):
+    if Path(s).is_dir():
         return s
-    else:
-        raise argparse.ArgumentTypeError(f"{repr(s)} is not a dir.")
+    raise argparse.ArgumentTypeError(f"{s!r} is not a dir.")
 
 
 def check_file(s: str) -> str:
-    if os.path.isfile(s) or not os.path.exists(s):
+    path = Path(s)
+    if path.is_file() or not path.exists():
         return s
-    elif not os.path.isdir(os.path.dirname(s)):
-        raise argparse.ArgumentTypeError(f"Base dir of {repr(s)} does not exist.")
-    else:
-        raise argparse.ArgumentTypeError(f"{repr(s)} is not a file.")
+    if not path.parent.is_dir():
+        raise argparse.ArgumentTypeError(f"Base dir of {s!r} does not exist.")
+    raise argparse.ArgumentTypeError(f"{s!r} is not a file.")
 
 
 def check_positive(s: str) -> int:
     v = int(s)
     if v >= 1:
         return v
-    else:
-        raise argparse.ArgumentTypeError(f"{repr(s)} is not a positive integer.")
+    raise argparse.ArgumentTypeError(f"{s!r} is not a positive integer.")
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,10 +53,8 @@ def parse_args() -> argparse.Namespace:
         formatter_class=(
             lambda prog: MBHelpFormatter(
                 prog,
-                **{
-                    "width": shutil.get_terminal_size(fallback=(120, 50)).columns,
-                    "max_help_position": 40,
-                },
+                width=shutil.get_terminal_size(fallback=(120, 50)).columns,
+                max_help_position=40,
             )
         ),
         epilog=usage,
@@ -96,9 +92,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     status = 0
-    if os.path.exists(args.save_path) and not args.overwrite:
+    save_path = Path(args.save_path)
+    if save_path.exists() and not args.overwrite:
         print(
-            f"{repr(args.save_path)} already exists. Use `-o` to overwrite.",
+            f"{save_path.resolve()} already exists. Use `-o` to overwrite.",
             file=sys.stderr,
         )
         status = 2
@@ -106,7 +103,7 @@ def main() -> None:
         font_path = None if args.tt_font == argparse.SUPPRESS else args.tt_font
         m = MakeBook(font_path=font_path)
         m.make(args.save_path, args.target_dir, font_size=args.font_size)
-        print(f"Done: {os.path.abspath(args.save_path)}")
+        print(f"Done: {save_path.resolve()}")
     sys.exit(status)
 
 
