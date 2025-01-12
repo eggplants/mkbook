@@ -1,50 +1,60 @@
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = [
-  "poetry-core",
+  "poetry-core>=2",
 ]
 
-[tool.poetry]
-authors = [
-  "eggplants <w10776e8w@yahoo.co.jp>",
+[project]
+name = "mkbook"
+version = "0.0.3"
+description = "Make directory including pictures into a PDF book"
+readme = "README.md"
+keywords = [
+  "conbine",
+  "getjump",
+  "pdf",
 ]
+license = { text = "MIT" }
+authors = [
+  { name = "eggplants", email = "w10776e8w@yahoo.co.jp" },
+]
+requires-python = ">=3.9,<4"
+
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
+  "Typing :: Typed",
 ]
-description = "Make directory including pictures into a PDF book"
-keywords = [
-  "getjump",
-  "pdf",
-  "conbine",
+dependencies = [
+  "pillow>=11.1,<12",
+  "reportlab>=4.2.5,<5",
+  "types-pillow>=10.2.0.20240822,<11",
+  "types-reportlab>=4.2.5.20241221,<5",
 ]
-name = "mkbook"
+urls.Repository = "https://github.com/eggplants/mkbook"
+scripts.mkbook = "mkbook.main:main"
+
+[tool.poetry]
+requires-poetry = ">=2.0"
+include = [ "mkbook/fonts/*.ttf" ]
 packages = [
   { include = "mkbook" },
 ]
-include = [ "mkbook/fonts/*.ttf" ]
-license = "MIT"
-readme = "README.md"
-repository = "https://github.com/eggplants/mkbook"
-version = "0.0.3"
-
-[tool.poetry.dependencies]
-python = ">=3.9,<4"
-pillow = "^11.1.0"
-reportlab = "^4.2.5"
-types-reportlab = "^4.2.5.20241221"
-types-pillow = "^10.2.0.20240822"
 
 [tool.poetry.group.dev.dependencies]
 mypy = ">=0.991,<1.15"
 pre-commit = ">=2.20,<5.0"
 taskipy = "^1.10.3"
 
-[tool.poetry.scripts]
-mkbook = "mkbook.main:main"
+[tool.poetry.requires-plugins]
+poetry-plugin-shell = ">=1.0"
 
 [tool.black]
 line-length = 120
@@ -77,8 +87,6 @@ strict = true
 [tool.pyright]
 pythonVersion = "3.9"
 typeCheckingMode = "strict"
-
-[tool]
 
 [tool.pytype]
 python_version = '3.9'
