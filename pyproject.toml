@@ -43,7 +43,9 @@ scripts.mkbook = "mkbook.main:main"
 
 [tool.poetry]
 requires-poetry = ">=2.0"
-include = [ "mkbook/fonts/*.ttf" ]
+include = [
+  { path = "mkbook/fonts/*.ttf", format = [ "sdist", "wheel" ] },
+]
 packages = [
   { include = "mkbook" },
 ]
