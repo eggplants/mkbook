@@ -1,12 +1,9 @@
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = [
-  "poetry-core>=2",
-]
+build-backend = "hatchling.build"
+requires = [ "hatchling", "uv-dynamic-versioning" ]
 
 [project]
 name = "mkbook"
-version = "0.0.3"
 description = "Make directory including pictures into a PDF book"
 readme = "README.md"
 keywords = [
@@ -15,11 +12,8 @@ keywords = [
   "pdf",
 ]
 license = { text = "MIT" }
-authors = [
-  { name = "eggplants", email = "w10776e8w@yahoo.co.jp" },
-]
+authors = [ { name = "eggplants", email = "w10776e8w@yahoo.co.jp" } ]
 requires-python = ">=3.9,<4"
-
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
@@ -32,53 +26,63 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
+dynamic = [ "version" ]
 dependencies = [
   "pillow>=11.1,<12",
   "reportlab>=4.2.5,<5",
   "types-pillow>=10.2.0.20240822,<11",
   "types-reportlab>=4.2.5.20241221,<5",
 ]
+
 urls.Repository = "https://github.com/eggplants/mkbook"
 scripts.mkbook = "mkbook.main:main"
 
-[tool.poetry]
-requires-poetry = ">=2.0"
+[dependency-groups]
+dev = [
+  "mypy>=0.991,<1.15",
+  "pre-commit>=2.20,<5",
+  "pytest>=8.3.5",
+  "pytest-cov>=6.1.1",
+  "taskipy>=1.10.3,<2",
+]
+docs = [ "pdoc" ]
+
+[tool.hatch.version]
+# tool.hatch.version.source is not listed in official schema.
+# https://github.com/ninoseki/uv-dynamic-versioning/issues/21
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.targets.sdist]
 include = [
-  { path = "mkbook/fonts/*.ttf", format = [ "sdist", "wheel" ] },
-]
-packages = [
-  { include = "mkbook" },
+  "mkbook",
+  "mkbook/fonts/*.ttf",
 ]
 
-[tool.poetry.group.dev.dependencies]
-mypy = ">=0.991,<1.15"
-pre-commit = ">=2.20,<5.0"
-taskipy = "^1.10.3"
-
-[tool.poetry.requires-plugins]
-poetry-plugin-shell = ">=1.0"
-
-[tool.black]
-line-length = 120
-target-version = [
-  'py39',
+[tool.hatch.build.targets.wheel]
+include = [
+  "mkbook",
+  "mkbook/fonts/*.ttf",
 ]
 
 [tool.ruff]
 line-length = 120
-
+format.indent-style = "space"
+format.quote-style = "double"
 lint.select = [
   "ALL",
 ]
 lint.ignore = [
-  "D",
   "T201", # `print` found
 ]
 lint.per-file-ignores."main.py" = [
   "EM102",  # Exception must not use an f-string literal, assign to variable first
   "TRY003", # Avoid specifying long messages outside the exception class
 ]
-lint.mccabe.max-complexity = 18
+lint.per-file-ignores."tests/*.py" = [
+  "D",
+  "S101", # Use of `assert` detected
+]
+lint.pydocstyle.convention = "google"
 
 [tool.mypy]
 pretty = true
@@ -98,8 +102,20 @@ precise_return = true
 protocols = true
 strict_import = true
 
+[tool.uv]
+default-groups = [
+  "dev",
+  "docs",
+]
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
+fallback-version = "0.0.0"
+
 [tool.taskipy.tasks]
 test = "pytest --cov=mkbook --cov-report=term"
 "test:ci" = "task test --cov-report=xml:cov.xml"
 lint = "pre-commit run -a"
 profile = "python -m cProfile"
+gendoc = "pdoc mkbook -o ./docs --docformat google"

@@ -1,3 +1,5 @@
+"""Create a PDF book from images."""
+
 from __future__ import annotations
 
 import importlib.resources
@@ -29,19 +31,38 @@ if TYPE_CHECKING:
 
 
 class MakeBook:
+    """Create a PDF book from images."""
+
     default_font = Path(str(importlib.resources.files("mkbook"))) / "fonts" / "RampartOne-Regular.ttf"
     img_extensions = PImage.registered_extensions()
 
     def __init__(self, font_path: str | Path | None = None) -> None:
+        """Initialize the MakeBook class.
+
+        Args:
+            font_path (str | Path | None): Path to the font file. If None, use the default font.
+        """
         self.set_font(font_path)
 
     def set_font(self, font_path: str | Path | None = None) -> None:
+        """Set the font for the PDF.
+
+        Args:
+            font_path (str | Path | None): Path to the font file. If None, use the default font.
+        """
         font_path = self.default_font if font_path is None else font_path
         font_name = Path(font_path).name.split(".")[0]
         pdfmetrics.registerFont(TTFont(font_name, font_path, asciiReadable=True))
         self.font_path, self.font_name = font_path, font_name
 
     def make(self, save_path: Path | str, target_path: str, font_size: int = 20) -> None:
+        """Create a PDF book from images.
+
+        Args:
+            save_path (Path | str): Path to save the PDF file.
+            target_path (str): Path to the target directory containing images.
+            font_size (int): Font size for the text in the PDF.
+        """
         text_style = ParagraphStyle(
             name="Normal",
             fontName=self.font_name,
@@ -93,7 +114,7 @@ class MakeBook:
             f_idx = 0
             for f_idx, img in enumerate(files):
                 print(
-                    f"\033[2K{idx+1}/{tree_size} ({f_idx+1}/{files_size})",
+                    f"\033[2K{idx + 1}/{tree_size} ({f_idx + 1}/{files_size})",
                     end="\n\033[A",
                 )
                 border_img = [[Image(Path(root) / img)]]
@@ -106,10 +127,10 @@ class MakeBook:
                 stories.append(Paragraph(f"{cnt}", text_style))
                 stories.append(PageBreak())
                 cnt += 1
-            print(f"\033[2K{idx+1}/{tree_size} ({f_idx}/{files_size})", end="\n\033[A")
+            print(f"\033[2K{idx + 1}/{tree_size} ({f_idx}/{files_size})", end="\n\033[A")
         print("\033[2KSaving...")
 
-        (min_w, min_h), *_, (max_w, max_h) = sorted(sizes)
+        (_min_w, _min_h), *_, (max_w, max_h) = sorted(sizes)
         max_w += 400
         max_h += 400
         doc = SimpleDocTemplate(str(save_path), pagesize=(max_w, max_h))
@@ -123,11 +144,28 @@ class MakeBook:
 
     @staticmethod
     def pil_to_bytes(img: PImage.Image) -> bytes:
+        """Convert a PIL image to bytes.
+
+        Args:
+            img (PIL.Image.Image): The PIL image to convert.
+
+        Returns:
+            bytes: The image in bytes format.
+        """
         img_bytes = io.BytesIO()
         img.save(img_bytes, format="PNG")
         return img_bytes.getvalue()
 
     def get_size(self, root: str, files: list[str]) -> tuple[float, float]:
+        """Get the size of the largest image in the directory.
+
+        Args:
+            root (str): The root directory.
+            files (list[str]): List of image files.
+
+        Returns:
+            tuple[float, float]: The width and height of the largest image.
+        """
         if len(files) == 0:
             return A4
         w, h = sorted(PImage.open(Path(root) / f).size for f in files)[-1]
@@ -135,6 +173,15 @@ class MakeBook:
 
     @staticmethod
     def sort_v(tree: list[tuple[str, list[str], list[str]]]) -> list[tuple[str, list[str], list[str]]]:
+        """Sort the directory tree.
+
+        Args:
+            tree (list[tuple[str, list[str], list[str]]]): The directory tree.
+
+        Returns:
+            list[tuple[str, list[str], list[str]]]: The sorted directory tree.
+        """
+
         def cmp(a: tuple[str, list[str], list[str]], b: tuple[str, list[str], list[str]]) -> int:
             def norm(s: str) -> str:
                 tr = str.maketrans("１２３４５６７８９０", "1234567890")  # noqa: RUF001

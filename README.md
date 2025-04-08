@@ -9,9 +9,13 @@
   )](
   https://results.pre-commit.ci/latest/github/eggplants/mkbook/master
 ) [![Maintainability](
-  https://api.codeclimate.com/v1/badges/4f7da30985c02a17efc5/maintainability
+  <https://qlty.sh/badges/1b18ac00-58a2-4a71-902d-76309813b0ab/maintainability.svg>
   )](
-  https://codeclimate.com/github/eggplants/mkbook/maintainability
+  <https://qlty.sh/gh/eggplants/projects/mkbook>
+) [![Code Coverage](
+  <https://qlty.sh/badges/1b18ac00-58a2-4a71-902d-76309813b0ab/test_coverage.svg>
+  )](
+  <https://qlty.sh/gh/eggplants/projects/mkbook>
 ) [![Release Package](
   https://github.com/eggplants/mkbook/actions/workflows/release.yml/badge.svg
   )](
