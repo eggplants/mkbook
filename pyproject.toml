@@ -23,6 +23,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
@@ -64,6 +65,12 @@ include = [
   "mkbook/fonts/*.ttf",
 ]
 
+[tool.uv]
+default-groups = [
+  "dev",
+  "docs",
+]
+
 [tool.ruff]
 line-length = 120
 format.indent-style = "space"
@@ -101,12 +108,6 @@ report_errors = true
 precise_return = true
 protocols = true
 strict_import = true
-
-[tool.uv]
-default-groups = [
-  "dev",
-  "docs",
-]
 
 [tool.uv-dynamic-versioning]
 vcs = "git"
